@@ -2,14 +2,23 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>きょう、なにする？</title>
+    <meta name="description" content="登録したやりたいことから、今日やることをランダムに1つ決めるアプリ" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <!-- ホーム画面に追加して使うための設定 -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="なにする？" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <!-- ステータスバーの色。テーマ切り替え時は src/hooks/useTheme.ts が書き換える -->
+    <meta name="theme-color" content="#08111f" />
     <script>
-      // 描画前にテーマを反映して、白背景選択時のちらつきを防ぐ（src/hooks/useTheme.ts と同じキー）
+      // 描画前にテーマを反映して、白背景選択時のちらつきを防ぐ（src/hooks/useTheme.ts と同じキー・色）
       try {
         if (JSON.parse(localStorage.getItem("yaritaikoto.theme.v1")) === "light") {
           document.documentElement.dataset.theme = "light";
+          document.querySelector('meta[name="theme-color"]').content = "#f3f5f8";
         }
       } catch {
         // 読めなければ既定（暗いネイビー）のまま

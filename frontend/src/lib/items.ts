@@ -87,19 +87,8 @@ function pickOne<T>(list: T[], random: () => number): T | null {
   return list[Math.floor(random() * list.length)];
 }
 
-/** 未完了項目から等確率で1件選ぶ。対象がなければ null */
-export function pickRandom(items: Item[], random: () => number = Math.random): Item | null {
-  return pickOne(todoItems(items), random);
-}
-
-/** 選出対象: すべて / 特定グループ / おまかせ（グループも抽選） */
-export type PickTarget = { kind: "all" } | { kind: "group"; groupId: string } | { kind: "auto" };
-
-/** 未完了項目があるグループ */
-export function groupsWithTodos(items: Item[], groups: Group[]): Group[] {
-  const todos = todoItems(items);
-  return groups.filter((g) => todos.some((item) => item.groupId === g.id));
-}
+/** 選出対象: すべて / 特定グループ */
+export type PickTarget = { kind: "all" } | { kind: "group"; groupId: string };
 
 /** 選出対象になる未完了項目 */
 export function candidates(items: Item[], target: PickTarget): Item[] {
@@ -107,20 +96,13 @@ export function candidates(items: Item[], target: PickTarget): Item[] {
   return target.kind === "group" ? todos.filter((item) => item.groupId === target.groupId) : todos;
 }
 
-/**
- * 対象に応じて1件選ぶ。
- * おまかせは、未完了項目があるグループから等確率でグループを選び、その中から等確率で1件選ぶ
- */
+/** 対象の未完了項目から等確率で1件選ぶ。対象がなければ null */
 export function pickForTarget(
   items: Item[],
-  groups: Group[],
   target: PickTarget,
   random: () => number = Math.random,
 ): Item | null {
-  if (target.kind !== "auto") return pickOne(candidates(items, target), random);
-  const group = pickOne(groupsWithTodos(items, groups), random);
-  if (group === null) return null;
-  return pickOne(candidates(items, { kind: "group", groupId: group.id }), random);
+  return pickOne(candidates(items, target), random);
 }
 
 /** 保存データを読み込む際の項目チェック。groupId がない旧データは「遊び」に移行する */

@@ -46,9 +46,12 @@ button.icon-button {
   border-radius: 999px;
 }
 
-button.icon-button:hover {
-  background: var(--surface-hover);
-  border-color: transparent;
+/* タッチ端末でタップ後に hover の色が残らないよう、hover できる端末だけに適用する */
+@media (hover: hover) {
+  button.icon-button:hover {
+    background: var(--surface-hover);
+    border-color: transparent;
+  }
 }
 
 .nav {
@@ -75,9 +78,11 @@ button.icon-button:hover {
   font-weight: 500;
 }
 
-.nav-button:hover {
-  color: var(--text-h);
-  box-shadow: none;
+@media (hover: hover) {
+  .nav-button:hover {
+    color: var(--text-h);
+    box-shadow: none;
+  }
 }
 
 .nav-button[aria-current="page"],
@@ -122,8 +127,10 @@ button {
     color 0.15s;
 }
 
-button:hover {
-  border-color: var(--border-strong);
+@media (hover: hover) {
+  button:hover {
+    border-color: var(--border-strong);
+  }
 }
 
 button:disabled,
@@ -158,9 +165,11 @@ button.primary {
   font-weight: 600;
 }
 
-button.primary:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+@media (hover: hover) {
+  button.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
 }
 
 button.outline {
@@ -170,9 +179,11 @@ button.outline {
   font-weight: 600;
 }
 
-button.outline:hover {
-  background: var(--surface-hover);
-  border-color: var(--text-h);
+@media (hover: hover) {
+  button.outline:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-h);
+  }
 }
 
 button.ghost {
@@ -181,10 +192,12 @@ button.ghost {
   color: var(--text);
 }
 
-button.ghost:hover {
-  color: var(--text-h);
-  background: var(--surface-hover);
-  border-color: transparent;
+@media (hover: hover) {
+  button.ghost:hover {
+    color: var(--text-h);
+    background: var(--surface-hover);
+    border-color: transparent;
+  }
 }
 
 button.danger {
@@ -194,9 +207,11 @@ button.danger {
   font-weight: 700;
 }
 
-button.danger:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+@media (hover: hover) {
+  button.danger:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
 }
 
 button.check::before {
@@ -516,8 +531,10 @@ button.select-trigger {
   font-weight: 500;
 }
 
-button.select-trigger:hover {
-  border-color: var(--border-strong);
+@media (hover: hover) {
+  button.select-trigger:hover {
+    border-color: var(--border-strong);
+  }
 }
 
 button.select-trigger[aria-expanded="true"] {
@@ -645,8 +662,10 @@ button.icon-button.small-icon {
   color: var(--text);
 }
 
-button.icon-button.small-icon:hover {
-  color: var(--text-h);
+@media (hover: hover) {
+  button.icon-button.small-icon:hover {
+    color: var(--text-h);
+  }
 }
 
 .note {
@@ -682,9 +701,11 @@ button.add-group {
   font-weight: 600;
 }
 
-button.add-group:hover {
-  background: var(--surface-hover);
-  border-color: var(--text-h);
+@media (hover: hover) {
+  button.add-group:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-h);
+  }
 }
 
 .add-group-form {

@@ -13,7 +13,6 @@ import {
 import {
   addItem,
   candidates,
-  groupsWithTodos,
   moveItem,
   pickForTarget,
   reconcileItems,
@@ -21,12 +20,13 @@ import {
   doneItems,
   normalizeText,
   parseItems,
-  pickRandom,
   removeItem,
   todoItems,
   reopenItem,
   type Item,
 } from "./items.ts";
+
+const ALL = { kind: "all" } as const;
 
 function setup(...texts: string[]): Item[] {
   return texts.reduce<Item[]>((items, text) => addItem(items, text, "play"), []);
@@ -62,7 +62,7 @@ test("選出は未完了項目からのみ、選出しても状態は変わら�
   let items = setup("a", "b", "c");
   items = completeItem(items, items[0].id);
   for (let i = 0; i < 100; i++) {
-    const picked = pickRandom(items);
+    const picked = pickForTarget(items, ALL);
     assert.ok(picked);
     assert.equal(picked.status, "todo");
   }
@@ -72,16 +72,16 @@ test("選出は未完了項目からのみ、選出しても状態は変わら�
 test("選出は各項目が等確率（random の値域に対して均等に割り当てる）", () => {
   const items = setup("a", "b", "c", "d");
   const picks = [0, 0.24, 0.25, 0.49, 0.5, 0.74, 0.75, 0.999].map(
-    (r) => pickRandom(items, () => r)?.text,
+    (r) => pickForTarget(items, ALL, () => r)?.text,
   );
   assert.deepEqual(picks, ["a", "a", "b", "b", "c", "c", "d", "d"]);
 });
 
 test("未完了が0件なら選出結果は null", () => {
-  assert.equal(pickRandom([]), null);
+  assert.equal(pickForTarget([], ALL), null);
   let items = setup("a");
   items = completeItem(items, items[0].id);
-  assert.equal(pickRandom(items), null);
+  assert.equal(pickForTarget(items, ALL), null);
 });
 
 test("やった で完了一覧に移り、完了日時が記録される", () => {
@@ -181,26 +181,7 @@ test("グループ指定の選出は、そのグループの未完了項目か�
   const target = { kind: "group", groupId: "study" } as const;
   assert.deepEqual(candidates(items, target).map((i) => i.text), ["英語"]);
   for (let i = 0; i < 50; i++) {
-    assert.equal(pickForTarget(items, DEFAULT_GROUPS, target)?.text, "英語");
+    assert.equal(pickForTarget(items, target)?.text, "英語");
   }
-  assert.equal(pickForTarget(items, DEFAULT_GROUPS, { kind: "group", groupId: "none" }), null);
-});
-
-test("おまかせは項目数に関係なくグループを等確率で選ぶ（勉強1件・遊び3件でも50:50）", () => {
-  const items = setupGrouped("study:英語", "play:映画", "play:ゲーム", "play:散歩");
-  // 1回目の乱数でグループ、2回目で項目を選ぶ
-  const seq = (...values: number[]) => () => values.shift() ?? 0;
-  assert.equal(pickForTarget(items, DEFAULT_GROUPS, { kind: "auto" }, seq(0.49, 0))?.text, "英語");
-  assert.equal(pickForTarget(items, DEFAULT_GROUPS, { kind: "auto" }, seq(0.5, 0))?.text, "映画");
-  assert.equal(pickForTarget(items, DEFAULT_GROUPS, { kind: "auto" }, seq(0.5, 0.99))?.text, "散歩");
-});
-
-test("おまかせは未完了項目がないグループを抽選対象から外す", () => {
-  let items = setupGrouped("study:英語", "play:映画");
-  items = completeItem(items, items[0].id);
-  assert.deepEqual(groupsWithTodos(items, DEFAULT_GROUPS).map((g) => g.id), ["play"]);
-  for (let i = 0; i < 50; i++) {
-    assert.equal(pickForTarget(items, DEFAULT_GROUPS, { kind: "auto" })?.text, "映画");
-  }
-  assert.equal(pickForTarget([], DEFAULT_GROUPS, { kind: "auto" }), null);
+  assert.equal(pickForTarget(items, { kind: "group", groupId: "none" }), null);
 });

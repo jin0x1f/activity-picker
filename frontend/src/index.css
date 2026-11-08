@@ -68,9 +68,24 @@
   color-scheme: light;
 }
 
+/* スマホでの操作感: タップ時の灰色のハイライトを出さない（フォーカス表示は別途あり）、
+   ダブルタップでの拡大をしない（再選出の連打で拡大しないように）、横向きで文字を勝手に拡大しない */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   background: var(--bg);
+}
+
+/* ボタンの長押しで文字が選択されないようにする */
+button {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #root {

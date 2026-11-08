@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { DiceIcon } from "../components/icons";
 import type { Group } from "../lib/groups";
 import {
   candidates,
-  groupsWithTodos,
   pickForTarget,
   todoItems,
   type Item,
@@ -48,11 +46,10 @@ function DecidePage({
 
   const todos = todoItems(items);
   const targetCount = candidates(items, target).length;
-  const autoGroups = groupsWithTodos(items, groups);
   const pickedGroup = groups.find((g) => g.id === picked?.groupId);
 
   const pick = () => {
-    onPick(pickForTarget(items, groups, target)?.id ?? null);
+    onPick(pickForTarget(items, target)?.id ?? null);
     setPickCount((n) => n + 1);
   };
 
@@ -81,13 +78,7 @@ function DecidePage({
       label: g.name,
       count: candidates(items, { kind: "group", groupId: g.id }).length,
     })),
-    { target: { kind: "auto" }, label: "おまかせ", count: todos.length },
   ];
-
-  const hint =
-    target.kind === "auto"
-      ? `${autoGroups.map((g) => g.name).join("・")} からグループも抽選します`
-      : `${targetCount}件の中から選びます`;
 
   return (
     <section className="page">
@@ -108,9 +99,8 @@ function DecidePage({
               className="chip"
               onClick={() => onTargetChange(option.target)}
             >
-              {option.target.kind === "auto" && <DiceIcon size={16} />}
               {option.label}
-              {option.target.kind !== "auto" && <span className="chip-count">{option.count}</span>}
+              <span className="chip-count">{option.count}</span>
             </button>
           );
         })}
@@ -139,7 +129,7 @@ function DecidePage({
             このグループには未完了のやりたいことがありません。
           </p>
         ) : (
-          <p className="muted small center">{hint}</p>
+          <p className="muted small center">{targetCount}件の中から選びます</p>
         )}
         <button type="button" className="primary" onClick={pick} disabled={targetCount === 0}>
           {picked ? "再選出" : "選出"}

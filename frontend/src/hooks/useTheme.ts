@@ -6,6 +6,9 @@ export type Theme = "dark" | "light";
 // index.html の初期化スクリプトと同じキー・形式（JSON 文字列）
 const THEME_KEY = "yaritaikoto.theme.v1";
 
+// スマホのステータスバーの色（index.css の --bg と同じ。index.html の初期化スクリプトにも同じ値がある）
+const THEME_COLORS: Record<Theme, string> = { dark: "#08111f", light: "#f3f5f8" };
+
 function parseTheme(raw: string | null): Theme {
   try {
     return raw !== null && JSON.parse(raw) === "light" ? "light" : "dark";
@@ -20,6 +23,7 @@ export function useTheme() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
   }, [theme]);
 
   return {
