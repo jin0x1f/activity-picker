@@ -1,6 +1,6 @@
 # きょう、なにする？ 設計書
 
-- 最終更新: 2026-11-08
+- 最終更新: 2026-11-18
 - 要件: [referende.md](referende.md)
 - 対象コード: [frontend/](../frontend/)
 
@@ -17,6 +17,7 @@
 - **使い方チュートリアル**: ヘッダーのヘルプボタンから開くモーダル。
 - **配色テーマ**: 暗いネイビー（既定）と白背景の 2 種類から選べる。
 - **スマホアプリとして利用（PWA）**: ホーム画面に追加してアプリとして起動でき、オフラインでも使える。
+- **iOS アプリ（Capacitor）**: 同じ Web アプリを Capacitor で包み、Xcode から iPhone にインストールできる。iOS アプリでは画面下部にバナー広告（AdMob）を出す。
 
 ## 2. 技術構成
 
@@ -28,6 +29,7 @@
 | データ保存 | `localStorage` | 再読み込み後もデータを保持でき、サーバー不要 |
 | テスト | `node:test`（`npm test`） | 追加依存なしでドメインロジックを検証できる |
 | Lint | ESLint（typescript-eslint, react-hooks） | |
+| iOS アプリ化 | Capacitor 8（`@capacitor/ios`・`@capacitor/status-bar`）、広告は `@capacitor-community/admob` | Web のコードをそのまま iOS アプリにできる。依存は Swift Package Manager で管理（CocoaPods 不要） |
 
 ルーティングライブラリは使わず、`App` が表示中の画面を state で切り替える（URL は変わらない）。
 
@@ -40,7 +42,9 @@
 | `npm run lint` | Lint |
 | `npm test` | ドメインロジックのテスト |
 | `npm run capture:tutorial` | チュートリアル用の画面画像を撮り直す（`npm run dev` 起動中に実行） |
-| `npm run generate:icons` | `public/icon.svg` からホーム画面用の PNG アイコンを書き出す |
+| `npm run generate:icons` | `public/icon.svg` からホーム画面用・iOS アプリ用の PNG アイコンを書き出す |
+| `npm run ios` | ビルドして `ios/` に反映（`cap sync ios`）し、Xcode を開く |
+| `npm run ios:sync` | ビルドして `ios/` に反映するだけ（Xcode は開かない） |
 
 ## 3. ディレクトリ構成
 
@@ -52,11 +56,15 @@ frontend/
 │   └── icon-192/512.png, apple-touch-icon.png  ホーム画面用アイコン（生成物）
 ├── sw/service-worker.js      Service Worker の本体（ビルド時に dist/sw.js として出力）
 ├── scripts/                  画像生成スクリプト（チュートリアル画像・アイコン）
+├── ios/                      iOS アプリの Xcode プロジェクト（Capacitor が生成。ios/App/App/public はビルドのコピーで git 管理外）
+├── capacitor.config.ts       Capacitor の設定（アプリ ID・名前・Web の出力先）
 └── vite.config.ts            ビルド設定 + sw.js を出力するプラグイン
 
 frontend/src/
 ├── main.tsx                  エントリポイント
-├── pwa.ts                    Service Worker の登録・ストレージ永続化の要求
+├── pwa.ts                    Service Worker の登録・ストレージ永続化の要求（iOS アプリでは SW を登録しない）
+├── ads.ts                    バナー広告（AdMob）の同意確認・表示・下端の余白（iOS アプリのみ）
+├── vite-env.d.ts             環境変数の型（VITE_ADMOB_IOS_BANNER_ID）
 ├── App.tsx                   画面切り替え・状態の集約（コンテナ）
 ├── App.css / index.css       スタイル
 ├── pages/                    画面
@@ -228,7 +236,7 @@ lib                 …ドメインロジック（純粋関数）。React にも
 
 ## 7. スマホアプリとしての利用（PWA）
 
-ネイティブアプリにはせず、PWA としてホーム画面に追加して使う（追加依存なし）。
+ブラウザから使う場合は、PWA としてホーム画面に追加して使う（追加依存なし）。iOS アプリとして使う場合は 8 章。
 
 - **インストール**: `manifest.webmanifest`（`display: standalone`・縦向き・アイコン）により、Android Chrome の「アプリをインストール」、iOS Safari の「ホーム画面に追加」でブラウザの枠なしで起動する。アイコンは maskable（図形を中央 80% に収める）。
 - **オフライン**: Service Worker（本番ビルドのみ登録）がビルド成果物をすべて事前キャッシュする。
@@ -243,11 +251,40 @@ lib                 …ドメインロジック（純粋関数）。React にも
   - データは端末内のみ。アプリの削除・サイトデータの消去で消える（バックアップ機能はない）。
   - Service Worker は HTTPS（または localhost）で配信したときだけ動く。
 
-## 8. 要件との対応・仮定
+## 8. iOS アプリ（Capacitor）
+
+Web アプリ（`dist/`）を Capacitor で WKWebView に載せて iOS アプリにする。画面・ロジックは Web と共通で、ネイティブ専用のコードは下記の分岐のみ。
+
+| 項目 | 値 |
+| --- | --- |
+| アプリ ID（Bundle ID） | `io.github.jin0x1f.kyounanisuru`（`capacitor.config.ts` と Xcode の `PRODUCT_BUNDLE_IDENTIFIER`） |
+| ホーム画面の名前 | なにする？（PWA の `short_name` と同じ） |
+| App Store での名前 | App Store Connect で決める（案: 「きょう、なにする？」。他アプリと重複不可） |
+| 対応 OS | iOS 15 以上。iPhone は縦向きのみ（`Info.plist`） |
+| アイコン | `npm run generate:icons` が `icon.svg` から 1024px・不透明の PNG を `ios/App/App/Assets.xcassets/AppIcon.appiconset/` に書き出す |
+
+- **ネイティブでの分岐**（`Capacitor.isNativePlatform()`）:
+  - Service Worker は登録しない（ファイルはアプリに同梱されており、`capacitor://` では SW が動かないため）。
+  - ステータスバーの文字色をテーマに合わせる（`useTheme` が `@capacitor/status-bar` で、暗いネイビーなら白文字・白背景なら黒文字）。`theme-color` は WebView では効かないため。
+- **セーフエリア**: `viewport-fit=cover` で画面の端まで描画し、ヘッダー上部・左右・下部に `env(safe-area-inset-*)` の余白を足す（ノッチ・ホームバーと重ならないように）。PWA・ブラウザでは inset が 0 なので見た目は変わらない。
+- **名前・ID の方針**:
+  - Bundle ID は App Store に登録すると変更できないため、所有している `jin0x1f.github.io`（GitHub アカウント）を逆順にした形にした。独自ドメインを取得した場合は、**初回の App Store 登録前に**それに変えてもよい。
+  - ホーム画面ではアイコン下の名前が全角 6 文字程度で省略されるため、短い「なにする？」にする。
+- **データ**: Web と同じく `localStorage`（WKWebView 内に保存）。Safari・PWA とはデータが別。アプリを削除すると消える。
+- **開発の流れ**: Web を変更したら `npm run ios`（または `ios:sync`）で `ios/` に反映し、Xcode で実機を選んで実行する。実機に入れるには Xcode の Signing & Capabilities で Apple ID のチームを選ぶ。
+- **広告（AdMob、`src/ads.ts`）**:
+  - 起動時に、UMP の同意確認（EU など同意が必要な地域だけ同意画面を表示）→ iOS の「トラッキングの許可」ダイアログ（未回答のときのみ）→ SDK 初期化 → 画面下部にアダプティブバナーを表示、の順に行う。どこかで失敗したら広告なしで動く。トラッキングを許可しなくても、パーソナライズなしの広告は出る。
+  - バナーはネイティブで WebView の上に重なるため、表示中は `<html>` の CSS 変数 `--ad-inset`（バナーの高さ + ホームバー分）を設定する。`.app` の下余白・チュートリアルのモーダルの配置・プルダウンのメニューの開く向き（`adBottomInset()`）がこれを考慮し、内容がバナーに隠れないようにする。
+  - 広告ユニット ID は `frontend/.env.local`（git 管理外）の `VITE_ADMOB_IOS_BANNER_ID`。未設定または開発中は Google のテスト広告を出す（自分で本番広告をタップすると AdMob のアカウント停止の対象になるため）。
+  - AdMob のアプリ ID は `Info.plist` の `GADApplicationIdentifier`（いまは Google のテスト用 ID）。ほかに `SKAdNetworkItems`（Google の ID のみ。必要に応じて AdMob の導入ガイドの一覧を追加）、`NSUserTrackingUsageDescription`（トラッキング許可ダイアログの説明文）を設定している。
+  - リリース前に必要なこと: AdMob でアプリ・広告ユニットを作成して ID を差し替える、AdMob で同意メッセージ（GDPR）を作成する、App Store Connect でプライバシーポリシーの URL と「App のプライバシー」（広告 SDK が収集するデータ）を申告する、AdMob に `app-ads.txt` を置くサイトを登録する。
+- **注意点**: iOS は端末の空き容量が極端に少ないと WebView のデータを消すことがある。確実に残したい場合は `@capacitor/preferences`（ネイティブの保存領域）への移行を検討する。
+
+## 9. 要件との対応・仮定
 
 | 未決事項（要件 6 章） | 本実装での扱い |
 | --- | --- |
-| 対象プラットフォーム | Web（スマホ幅でも使えるレイアウト）。PWA としてホーム画面に追加して使える |
+| 対象プラットフォーム | Web（スマホ幅でも使えるレイアウト）。PWA としてホーム画面に追加して使える。Capacitor で iOS アプリにもできる |
 | アプリ名 | 「きょう、なにする？」 |
 | データ保存・同期 | `localStorage`。端末間の同期はしない |
 | 重複登録 | 項目は許可（グループ名は重複不可） |
@@ -255,7 +292,7 @@ lib                 …ドメインロジック（純粋関数）。React にも
 | 選出履歴 | 記録しない |
 | ログイン・共有・通知・期限など | なし |
 
-## 9. テスト
+## 10. テスト
 
 `lib/items.test.ts` で、受け入れ条件（要件 5 章）のうちロジックで確認できるものと、グループ機能を検証している。
 
@@ -267,10 +304,11 @@ lib                 …ドメインロジック（純粋関数）。React にも
 - グループの入力チェック・追加・名前変更・削除・項目の移動・整合性補正
 - グループ指定の選出
 
-画面の動作（画面遷移・表示）は自動テストがなく、`npm run dev` での手動確認による。
+画面の動作（画面遷移・表示）は自動テストがなく、`npm run dev` での手動確認による。iOS アプリは Xcode から実機・シミュレータで手動確認する。
 
-## 10. セキュリティ上の考慮
+## 11. セキュリティ上の考慮
 
-- サーバー・外部通信なし。データは端末の `localStorage` にのみ保存する（第三者には送信されない）。
+- サーバーなし。ユーザーが登録したデータは端末の `localStorage` にのみ保存し、どこにも送信しない。
+- 例外として iOS アプリでは広告 SDK（Google Mobile Ads）が広告配信のために通信し、端末情報（トラッキング許可時は広告識別子も）を Google に送る。ユーザーの登録内容は広告 SDK に渡さない。
 - ユーザー入力は React の通常の描画（テキストノード）で表示し、`dangerouslySetInnerHTML`・`eval` などは使わない（HTML を入力しても文字列として表示される）。
 - `localStorage` の内容は信頼せず、読み込み時に型を検査して不正な要素は捨てる（4.4）。

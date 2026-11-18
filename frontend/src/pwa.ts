@@ -1,8 +1,13 @@
+import { Capacitor } from "@capacitor/core";
+
 /** スマホのホーム画面に追加して使うための設定（本番ビルドのみ） */
 
-/** オフラインでも起動できるよう Service Worker を登録する */
+/**
+ * オフラインでも起動できるよう Service Worker を登録する。
+ * iOS アプリ（Capacitor）ではファイルがアプリに同梱されていて不要なため登録しない
+ */
 export function registerServiceWorker() {
-  if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
+  if (!import.meta.env.PROD || Capacitor.isNativePlatform() || !("serviceWorker" in navigator)) return;
   window.addEventListener("load", () => {
     navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
       // 登録できなくても通常どおり動く（オフライン起動ができないだけ）

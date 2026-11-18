@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { Capacitor } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
 import { usePersistentState } from "./usePersistentState";
 
 export type Theme = "dark" | "light";
@@ -24,6 +26,10 @@ export function useTheme() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
+    // iOS アプリでは theme-color が効かないため、ステータスバーの文字色をテーマに合わせる（暗い背景なら白文字）
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setStyle({ style: theme === "dark" ? Style.Dark : Style.Light }).catch(() => {});
+    }
   }, [theme]);
 
   return {

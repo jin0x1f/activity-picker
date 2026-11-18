@@ -1,7 +1,10 @@
+/* viewport-fit=cover で画面の端まで描画するため、ノッチ・ホームバー（セーフエリア）の分だけ内側に寄せる。
+   iOS アプリでバナー広告が出ている間は、下端をバナーの分（--ad-inset、src/ads.ts が設定）まで空ける */
 .app {
   max-width: 600px;
   margin: 0 auto;
-  padding: 0 16px 48px;
+  padding: 0 max(16px, env(safe-area-inset-right)) calc(48px + var(--ad-inset, env(safe-area-inset-bottom)))
+    max(16px, env(safe-area-inset-left));
 }
 
 /* ---------- ヘッダー / タブ ---------- */
@@ -10,7 +13,7 @@
   top: 0;
   z-index: 1;
   background: var(--bg);
-  padding: 16px 0 12px;
+  padding: calc(16px + env(safe-area-inset-top)) 0 12px;
 }
 
 .header-row {
@@ -810,6 +813,8 @@ button.add-group {
   background: var(--surface);
   color: var(--text);
   box-shadow: var(--shadow);
+  /* バナー広告と重ならないよう、広告を除いた領域の中央に出す */
+  bottom: var(--ad-inset, 0px);
 }
 
 .tutorial::backdrop {

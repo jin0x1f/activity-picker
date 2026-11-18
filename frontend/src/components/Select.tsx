@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from "react";
+import { adBottomInset } from "../ads";
 import { CheckIcon, ChevronDownIcon } from "./icons";
 
 export type SelectOption = { value: string; label: string };
@@ -70,7 +71,9 @@ function Select({
       const trigger = triggerRef.current;
       if (!trigger) return;
       const rect = trigger.getBoundingClientRect();
-      const below = window.innerHeight - rect.bottom - MENU_GAP;
+      // 下端のバナー広告（iOS アプリのみ）に重ならないよう、その分を除いた高さで考える
+      const viewportBottom = window.innerHeight - adBottomInset();
+      const below = viewportBottom - rect.bottom - MENU_GAP;
       const above = rect.top - MENU_GAP;
       const openUp = below < Math.min(MENU_MAX_HEIGHT, 160) && above > below;
       setMenuStyle({
