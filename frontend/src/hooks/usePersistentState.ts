@@ -1,22 +1,18 @@
 import { useEffect, useState } from "react";
+import { loadItem, saveItem } from "../storage";
 
-/** localStorage に保存される state。別タブでの変更も反映する */
+/** localStorage（iOS アプリでは Preferences にも）に保存される state。別タブでの変更も反映する */
 export function usePersistentState<T>(key: string, parse: (raw: string | null) => T) {
   const [value, setValue] = useState<T>(() => {
     try {
-      return parse(localStorage.getItem(key));
+      return parse(loadItem(key));
     } catch {
       return parse(null);
     }
   });
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      // 保存できない環境（プライベートモード等）ではメモリ上のみで動作する
-    }
-  }, [key, value]);
+  // 保存できない環境（プライベートモード等）ではメモリ上のみで動作する
+  useEffect(() => saveItem(key, JSON.stringify(value)), [key, value]);
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
