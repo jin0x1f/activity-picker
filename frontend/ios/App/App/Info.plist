@@ -64,9 +64,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<!-- AdMob: アプリ ID（いまは Google のテスト用。AdMob でアプリを登録したら本番の ID に差し替える） -->
+	<!-- AdMob: アプリ ID -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-1789425540376043~2265307812</string>
 	<!-- AdMob: 広告の効果測定（SKAdNetwork）。Google 以外の広告主の ID は AdMob の iOS 導入ガイドの一覧を追加する -->
 	<key>SKAdNetworkItems</key>
 	<array>

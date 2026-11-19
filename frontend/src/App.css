@@ -30,6 +30,17 @@
 }
 
 /* ページ見出し（.page-head h2: 20px）より大きくして、アプリ名を最上位に見せる */
+/* ---------- フッター ---------- */
+.app-footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.app-footer a {
+  color: var(--text);
+}
+
 .app-title {
   font-size: 22px;
   font-weight: 800;

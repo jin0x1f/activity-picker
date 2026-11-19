@@ -1,6 +1,6 @@
 # きょう、なにする？ 設計書
 
-- 最終更新: 2026-11-18
+- 最終更新: 2026-11-19
 - 要件: [referende.md](referende.md)
 - 対象コード: [frontend/](../frontend/)
 
@@ -45,6 +45,7 @@
 | `npm run generate:icons` | `public/icon.svg` からホーム画面用・iOS アプリ用の PNG アイコンと iOS の起動画面を書き出す |
 | `npm run ios` | ビルドして `ios/` に反映（`cap sync ios`）し、Xcode を開く |
 | `npm run ios:sync` | ビルドして `ios/` に反映するだけ（Xcode は開かない） |
+| `npm run ios:test` | `npm run ios` と同じだが、広告をテスト広告にする（自分の端末での確認用） |
 
 ## 3. ディレクトリ構成
 
@@ -52,12 +53,14 @@
 frontend/
 ├── public/                   そのまま配信するファイル
 │   ├── manifest.webmanifest  PWA の設定（アプリ名・アイコン・表示モード）
+│   ├── privacy.html          プライバシーポリシー（アプリのフッターからリンク。App Store Connect にも URL を登録）
 │   ├── icon.svg              アプリアイコン（favicon 兼用。PNG の元データ）
 │   └── icon-192/512.png, apple-touch-icon.png  ホーム画面用アイコン（生成物）
 ├── sw/service-worker.js      Service Worker の本体（ビルド時に dist/sw.js として出力）
 ├── scripts/                  画像生成スクリプト（チュートリアル画像・アイコン）
 ├── ios/                      iOS アプリの Xcode プロジェクト（Capacitor が生成。ios/App/App/public はビルドのコピーで git 管理外）
 ├── capacitor.config.ts       Capacitor の設定（アプリ ID・名前・Web の出力先）
+├── .env.production           本番ビルドで使う AdMob の広告ユニット ID（公開して問題ない値なので git 管理）
 └── vite.config.ts            ビルド設定 + sw.js を出力するプラグイン
 
 frontend/src/
@@ -167,7 +170,7 @@ lib                 …ドメインロジック（純粋関数）。React にも
 
 ## 5. 画面設計
 
-全画面共通: ヘッダーにアプリ名（「きょう、なにする？」）・テーマ切替ボタン・ヘルプボタン、タブ（決定 / やりたいこと / やったこと）。タブには未完了・完了の件数バッジを表示する。
+全画面共通: ヘッダーにアプリ名（「きょう、なにする？」）・テーマ切替ボタン・ヘルプボタン、タブ（決定 / やりたいこと / やったこと）。末尾のフッターにプライバシーポリシー（`public/privacy.html`）へのリンク（App Store の審査でアプリ内から開けることが求められるため）。タブには未完了・完了の件数バッジを表示する。
 
 ### A. やりたいこと決定画面（`DecidePage`）
 
@@ -278,10 +281,11 @@ Web アプリ（`dist/`）を Capacitor で WKWebView に載せて iOS アプリ
 - **広告（AdMob、`src/ads.ts`）**:
   - 起動時に、UMP の同意確認（EU など同意が必要な地域だけ同意画面を表示）→ iOS の「トラッキングの許可」ダイアログ（未回答のときのみ）→ SDK 初期化 → 画面下部にアダプティブバナーを表示、の順に行う。どこかで失敗したら広告なしで動く。トラッキングを許可しなくても、パーソナライズなしの広告は出る。
   - バナーはネイティブで WebView の上に重なるため、表示中は `<html>` の CSS 変数 `--ad-inset`（バナーの高さ + ホームバー分）を設定する。`.app` の下余白・チュートリアルのモーダルの配置・プルダウンのメニューの開く向き（`adBottomInset()`）がこれを考慮し、内容がバナーに隠れないようにする。
-  - 広告ユニット ID は `frontend/.env.local`（git 管理外）の `VITE_ADMOB_IOS_BANNER_ID`。未設定または開発中は Google のテスト広告を出す（自分で本番広告をタップすると AdMob のアカウント停止の対象になるため）。
-  - テスト用のアプリ ID では、起動時に Google が用意した英語の説明画面（トラッキングの許可を求めるもの）が出る。本番では AdMob で作成したメッセージ（日本語にできる）が出る。
-  - AdMob のアプリ ID は `Info.plist` の `GADApplicationIdentifier`（いまは Google のテスト用 ID）。ほかに `SKAdNetworkItems`（Google の ID のみ。必要に応じて AdMob の導入ガイドの一覧を追加）、`NSUserTrackingUsageDescription`（トラッキング許可ダイアログの説明文）を設定している。
-  - リリース前に必要なこと: AdMob でアプリ・広告ユニットを作成して ID を差し替える、AdMob で同意メッセージ（GDPR）を作成する、App Store Connect でプライバシーポリシーの URL と「App のプライバシー」（広告 SDK が収集するデータ）を申告する、AdMob に `app-ads.txt` を置くサイトを登録する。
+  - AdMob のアプリ ID は `Info.plist` の `GADApplicationIdentifier`（`ca-app-pub-1789425540376043~2265307812`）。
+  - バナーの広告ユニット ID は `frontend/.env.production` の `VITE_ADMOB_IOS_BANNER_ID`（`ca-app-pub-1789425540376043/3167325941`）。
+  - テスト広告（Google のテスト用広告ユニット。プラグインの `isTesting`）になる条件: 開発サーバー、広告ユニット ID 未設定、`npm run ios:test`（`VITE_ADMOB_TEST=1`）でのビルド。自分で本番広告をタップすると AdMob のアカウント停止の対象になるため、自分の端末での確認は `ios:test` で行う。**App Store に提出するビルドは必ず `npm run ios`（本番広告）で作る。**
+  - 起動時の同意画面・トラッキングの説明画面は、AdMob の「プライバシーとメッセージ」で作成したものが出る。ほかに `SKAdNetworkItems`（Google の ID のみ。必要に応じて AdMob の導入ガイドの一覧を追加）、`NSUserTrackingUsageDescription`（トラッキング許可ダイアログの説明文）を設定している。
+  - リリース前に必要なこと: App Store Connect でプライバシーポリシーの URL と「App のプライバシー」（広告 SDK が収集するデータ）を申告する。公開後に AdMob でアプリとストアを紐づけ、`app-ads.txt` を置く。
 
 ## 9. 要件との対応・仮定
 

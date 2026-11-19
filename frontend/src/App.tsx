@@ -108,6 +108,10 @@ function App() {
           <DoneListPage done={done} groups={groups} onReopen={itemStore.reopen} />
         )}
       </main>
+      {/* App Store の審査でアプリ内からも開けることが求められるため、全画面の末尾に置く */}
+      <footer className="app-footer">
+        <a href="privacy.html">プライバシーポリシー</a>
+      </footer>
       {tutorial.open && <Tutorial theme={theme.theme} onClose={tutorial.close} />}
     </div>
   );

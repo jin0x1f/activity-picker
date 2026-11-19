@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>プライバシーポリシー | きょう、なにする？</title>
+    <meta name="theme-color" content="#08111f" />
+    <!-- アプリ本体（index.html / src/hooks/useTheme.ts）と同じキーで配色テーマを反映する -->
+    <script>
+      try {
+        if (JSON.parse(localStorage.getItem("yaritaikoto.theme.v1")) === "light") {
+          document.documentElement.dataset.theme = "light";
+          document.querySelector('meta[name="theme-color"]').content = "#f3f5f8";
+        }
+      } catch {
+        // 読めなければ既定（暗いネイビー）のまま
+      }
+    </script>
+    <style>
+      :root {
+        --bg: #08111f;
+        --text-h: #ffffff;
+        --text: #bfcbdc;
+        --border: rgba(255, 255, 255, 0.18);
+        --link: #dcebfb;
+        color-scheme: dark;
+      }
+      :root[data-theme="light"] {
+        --bg: #f3f5f8;
+        --text-h: #0e1b2e;
+        --text: #46597a;
+        --border: rgba(14, 27, 46, 0.14);
+        --link: #1c3354;
+        color-scheme: light;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 16px/1.8 system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+        -webkit-text-size-adjust: 100%;
+      }
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: calc(16px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+          calc(48px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      }
+      h1 {
+        margin: 16px 0 8px;
+        color: var(--text-h);
+        font-size: 22px;
+        line-height: 1.4;
+      }
+      h2 {
+        margin: 32px 0 8px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        color: var(--text-h);
+        font-size: 17px;
+      }
+      p,
+      ul {
+        margin: 8px 0;
+      }
+      ul {
+        padding-left: 1.4em;
+      }
+      a {
+        color: var(--link);
+        overflow-wrap: anywhere;
+      }
+      .back {
+        display: inline-block;
+        padding: 8px 0;
+        font-weight: 700;
+      }
+      .meta {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="back" href="./">← アプリに戻る</a>
+      <h1>プライバシーポリシー</h1>
+      <p>
+        「きょう、なにする？」（以下「本アプリ」）における利用者の情報の取り扱いについて、以下のとおり定めます。
+      </p>
+
+      <h2>1. 本アプリに登録したデータ</h2>
+      <p>
+        本アプリに登録した「やりたいこと」・グループ・完了履歴・設定は、利用者の端末内にのみ保存されます。開発者のサーバーなど外部に送信されることはなく、開発者がこれらの内容を取得することはありません。
+      </p>
+      <p>
+        データは本アプリを削除すると端末から消去されます（バックアップ・復元の機能はありません）。
+      </p>
+
+      <h2>2. 広告について（iPhone アプリ）</h2>
+      <p>
+        iPhone アプリ版では、広告配信のために Google LLC の広告サービス「Google AdMob」を利用しています。Google AdMob は、広告の配信・効果測定・不正防止のために、次のような情報を収集・利用することがあります。
+      </p>
+      <ul>
+        <li>広告識別子（IDFA。利用者がトラッキングを許可した場合のみ）</li>
+        <li>IP アドレス、端末の種類・OS のバージョン・言語などの端末情報</li>
+        <li>IP アドレスなどから推定されるおおよその位置情報</li>
+        <li>広告の表示・タップの状況、アプリの利用状況、クラッシュなどの診断情報</li>
+      </ul>
+      <p>
+        本アプリに登録したデータ（第 1 項）が広告サービスに渡されることはありません。Google による情報の取り扱いについては、次のページをご覧ください。
+      </p>
+      <ul>
+        <li>
+          <a href="https://policies.google.com/technologies/partner-sites?hl=ja">
+            Google のサービスを使用するサイトやアプリから収集した情報の Google による使用
+          </a>
+        </li>
+        <li><a href="https://policies.google.com/privacy?hl=ja">Google プライバシーポリシー</a></li>
+      </ul>
+
+      <h2>3. トラッキングとパーソナライズ広告</h2>
+      <p>
+        初回起動時に、利用者の興味に合わせた広告（パーソナライズ広告）のためのトラッキングを許可するかを確認します。許可しない場合でも、本アプリのすべての機能を利用でき、パーソナライズされていない広告が表示されます。
+      </p>
+      <p>
+        許可の設定は、iPhone の「設定」→「プライバシーとセキュリティ」→「トラッキング」からいつでも変更できます。欧州経済領域（EEA）・英国などでは、法令に基づく同意画面を表示し、同意の内容に従って広告を配信します。
+      </p>
+
+      <h2>4. ブラウザ版について</h2>
+      <p>
+        ブラウザ版（ホーム画面に追加して使う場合を含む）では広告を表示せず、アクセス解析などの外部サービスも利用していません。
+      </p>
+
+      <h2>5. ポリシーの変更</h2>
+      <p>
+        本ポリシーの内容は、必要に応じて変更することがあります。変更した場合は、このページで最新の内容をお知らせします。
+      </p>
+
+      <h2>6. お問い合わせ</h2>
+      <p>
+        本ポリシーや本アプリに関するお問い合わせは、次のメールアドレスまでご連絡ください。<br />
+        <a href="mailto:jin.131.k@gmail.com">jin.131.k@gmail.com</a>
+      </p>
+
+      <p class="meta">制定日: 2026 年 11 月 19 日</p>
+    </main>
+  </body>
+</html>

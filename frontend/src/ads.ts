@@ -17,11 +17,13 @@ import {
 // Google が公開しているテスト用のバナー広告ユニット ID（iOS）。本番 ID が未設定のときに使う
 const DEMO_BANNER_ID = "ca-app-pub-3940256099942544/2934735716";
 
-// 本番の広告ユニット ID は frontend/.env.local（git 管理外）に VITE_ADMOB_IOS_BANNER_ID として書く
+// 本番の広告ユニット ID（frontend/.env.production の VITE_ADMOB_IOS_BANNER_ID）
 const BANNER_ID: string = import.meta.env.VITE_ADMOB_IOS_BANNER_ID || DEMO_BANNER_ID;
 
-// 開発中・本番 ID 未設定のときはテスト広告を出す（自分で本番広告をタップするとアカウント停止の対象になるため）
-const IS_TESTING = import.meta.env.DEV || BANNER_ID === DEMO_BANNER_ID;
+// テスト広告を出す条件: 開発サーバー・本番 ID 未設定・確認用ビルド（npm run ios:test で VITE_ADMOB_TEST=1）。
+// 自分で本番広告をタップすると AdMob のアカウント停止の対象になるため、自分の端末での確認はテスト広告で行う
+const IS_TESTING =
+  import.meta.env.DEV || BANNER_ID === DEMO_BANNER_ID || import.meta.env.VITE_ADMOB_TEST === "1";
 
 let bannerHeight = 0;
 

@@ -12,7 +12,8 @@
     "capture:tutorial": "node scripts/capture-tutorial.mjs",
     "generate:icons": "node scripts/generate-icons.mjs",
     "ios": "npm run build && cap sync ios && cap open ios",
-    "ios:sync": "npm run build && cap sync ios"
+    "ios:sync": "npm run build && cap sync ios",
+    "ios:test": "VITE_ADMOB_TEST=1 npm run ios"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.4.2",
