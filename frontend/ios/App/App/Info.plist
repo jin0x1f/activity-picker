@@ -64,6 +64,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- 輸出コンプライアンス: 標準の HTTPS 以外の暗号化は使わない（アップロードのたびの質問を省く） -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<!-- AdMob: アプリ ID -->
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-1789425540376043~2265307812</string>
