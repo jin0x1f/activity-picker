@@ -243,9 +243,12 @@ lib                 …ドメインロジック（純粋関数）。React にも
 
 ブラウザから使う場合は、PWA としてホーム画面に追加して使う（追加依存なし）。iOS アプリとして使う場合は 8 章。
 
+- **公開先**: GitHub Pages（https://jin0x1f.github.io/activity-picker/ ）。`main` に `frontend/` の変更を push すると、`.github/workflows/deploy-pages.yml` がテスト・ビルドして公開する。Pages ではサブパスで配信するため `--base=/activity-picker/` を付けてビルドする（iOS アプリ用のビルドは `/` のまま）。
+- プライバシーポリシーは https://jin0x1f.github.io/activity-picker/privacy.html （App Store Connect のプライバシーポリシー URL・サポート URL に使う）。
+
 - **インストール**: `manifest.webmanifest`（`display: standalone`・縦向き・アイコン）により、Android Chrome の「アプリをインストール」、iOS Safari の「ホーム画面に追加」でブラウザの枠なしで起動する。アイコンは maskable（図形を中央 80% に収める）。
 - **オフライン**: Service Worker（本番ビルドのみ登録）がビルド成果物をすべて事前キャッシュする。
-  - ページ本体はネットワーク優先、つながらなければキャッシュ。JS・CSS・画像はキャッシュ優先（ファイル名にハッシュが付くため）。
+  - ページはネットワーク優先、つながらなければキャッシュ（`privacy.html` などキャッシュにあるページはそれを、なければアプリ本体を返す）。JS・CSS・画像はキャッシュ優先（ファイル名にハッシュが付くため）。
   - キャッシュ名のバージョンは成果物の内容のハッシュ。新しいビルドを配信すると新しい SW が入り、古いキャッシュを消す。
   - 事前キャッシュの一覧は `vite.config.ts` のプラグインが `dist/` の中身から生成し、`sw/service-worker.js` の先頭に付けて `dist/sw.js` に書き出す。
 - **ステータスバー色**: `<meta name="theme-color">` をテーマの背景色に合わせる（`useTheme` が切り替え時に更新、`index.html` の初期化スクリプトでも反映）。

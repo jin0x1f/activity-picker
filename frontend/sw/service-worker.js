@@ -35,11 +35,15 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
 
-  // ページ本体はネットワーク優先（更新をすぐ反映）、つながらなければキャッシュ
+  // ページはネットワーク優先（更新をすぐ反映）、つながらなければキャッシュ
+  // （privacy.html などキャッシュにあるページはそれを、なければアプリ本体を返す）
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request).catch(() =>
-        caches.match(INDEX_URL).then((cached) => cached ?? Response.error()),
+        caches
+          .match(request, { ignoreSearch: true })
+          .then((cached) => cached ?? caches.match(INDEX_URL))
+          .then((cached) => cached ?? Response.error()),
       ),
     );
     return;
