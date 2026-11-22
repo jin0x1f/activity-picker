@@ -1,6 +1,6 @@
 # きょう、なにする？ 設計書
 
-- 最終更新: 2026-11-19
+- 最終更新: 2026-11-22
 - 要件: [referende.md](referende.md)
 - 対象コード: [frontend/](../frontend/)
 
@@ -282,7 +282,7 @@ Web アプリ（`dist/`）を Capacitor で WKWebView に載せて iOS アプリ
 - **データ**（`src/storage.ts`）: 画面側は Web と同じく `localStorage` を同期的に読み書きし、iOS アプリでは書き込みのたびに同じ内容を Preferences（iOS の UserDefaults）にも保存する。WKWebView の `localStorage` は空き容量が極端に少ないと OS に消されることがあるため、起動時に Preferences の内容（キーが `yaritaikoto.` で始まるもの）を `localStorage` に戻してから描画する。Preferences が空なら、逆に `localStorage` の内容を Preferences に移す。Safari・PWA とはデータが別。アプリを削除すると消える。
 - **開発の流れ**: Web を変更したら `npm run ios`（または `ios:sync`）で `ios/` に反映し、Xcode で実機を選んで実行する。実機に入れるには Xcode の Signing & Capabilities で Apple ID のチームを選ぶ。
 - **広告（AdMob、`src/ads.ts`）**:
-  - 起動時に、UMP の同意確認（EU など同意が必要な地域だけ同意画面を表示）→ iOS の「トラッキングの許可」ダイアログ（未回答のときのみ）→ SDK 初期化 → 画面下部にアダプティブバナーを表示、の順に行う。どこかで失敗したら広告なしで動く。トラッキングを許可しなくても、パーソナライズなしの広告は出る。
+  - 起動時に、UMP の同意確認（EU など同意が必要な地域だけ同意画面を表示）→ iOS の「トラッキングの許可」ダイアログ（未回答のときのみ）→ SDK 初期化 → 画面下部にアダプティブバナーを表示、の順に行う。同意情報の取得自体に失敗したとき（通信エラー・AdMob 側の設定待ちなど）は止めずに進める（Google のサンプルと同じく、前回までに保存された同意状態に広告 SDK が従う）。それ以外で失敗したら広告なしで動き、原因を `console.warn` に出す。トラッキングを許可しなくても、パーソナライズなしの広告は出る。
   - バナーはネイティブで WebView の上に重なるため、表示中は `<html>` の CSS 変数 `--ad-inset`（バナーの高さ + ホームバー分）を設定する。`.app` の下余白・チュートリアルのモーダルの配置・プルダウンのメニューの開く向き（`adBottomInset()`）がこれを考慮し、内容がバナーに隠れないようにする。
   - AdMob のアプリ ID は `Info.plist` の `GADApplicationIdentifier`（`ca-app-pub-1789425540376043~2265307812`）。
   - バナーの広告ユニット ID は `frontend/.env.production` の `VITE_ADMOB_IOS_BANNER_ID`（`ca-app-pub-1789425540376043/3167325941`）。

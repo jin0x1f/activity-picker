@@ -61,11 +61,7 @@ function setBannerHeight(height: number) {
 export async function setupAds() {
   if (!Capacitor.isNativePlatform()) return;
   try {
-    let consent = await AdMob.requestConsentInfo();
-    if (consent.isConsentFormAvailable && consent.status === AdmobConsentStatus.REQUIRED) {
-      consent = await AdMob.showConsentForm();
-    }
-    if (!consent.canRequestAds) return;
+    if (!(await checkConsent())) return;
 
     const tracking = await AdMob.trackingAuthorizationStatus();
     if (tracking.status === "notDetermined") await AdMob.requestTrackingAuthorization();
@@ -79,8 +75,28 @@ export async function setupAds() {
       margin: 0,
       isTesting: IS_TESTING,
     });
-  } catch {
+  } catch (error) {
     // 通信できない・広告の在庫がない等。広告なしで動かす
+    console.warn("広告を表示できませんでした", error);
     setBannerHeight(0);
   }
+}
+
+/**
+ * UMP で同意を確認し、広告をリクエストしてよいかを返す。
+ * 同意情報の取得自体に失敗したとき（通信エラー・AdMob 側の設定待ちなど）は止めずに進める。
+ * Google のサンプルと同じく、前回までに保存された同意状態があれば広告 SDK がそれに従う
+ */
+async function checkConsent(): Promise<boolean> {
+  let consent;
+  try {
+    consent = await AdMob.requestConsentInfo();
+  } catch (error) {
+    console.warn("同意情報を取得できませんでした。広告の表示は続けます", error);
+    return true;
+  }
+  if (consent.isConsentFormAvailable && consent.status === AdmobConsentStatus.REQUIRED) {
+    consent = await AdMob.showConsentForm();
+  }
+  return consent.canRequestAds;
 }
